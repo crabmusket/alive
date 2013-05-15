@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Alive</title>
+
+	<link rel="stylesheet" type="text/css" href="./style/normalize.css">
+	<link rel="stylesheet" type="text/css" href="./style/style.css">
+
+	<script type="text/javascript" src="./processee/lib/jquery.min.js"></script>
+	<script type="text/javascript" src="./processee/lib/processing.min.js"></script>
+	<script type="text/javascript" src="./processee/lib/coffee-script.min.js"></script>
+
+	<script type="text/javascript" src="./processee/js/processee.js"></script>
+
+	<script type="text/coffeescript" src="./alive.coffee"></script>
+</head>
+
+<body>
+	<h1>Alive</h1>
+	<div class="output" id="output">
+		<div class="webcam">
+			<video id="webcam"></video>
+		</div>
+		<canvas class="output" id="processing"></canvas>
+		<div class="output-buttons">
+			<a class="button small save-image" onclick="saveOutput();"></a>
+		</div>
+	</div>
+	<p id="instructions"></p>
+
+	<div class="internals">
+		<canvas id="processee-internal-canvas"></canvas>
+		<img id="processee-image-loader"></img>
+	</div>
+</body>
+</html>
