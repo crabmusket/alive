@@ -1,0 +1,3 @@
+[submodule "processee"]
+	path = processee
+	url = git@github.com:eightyeight/processee.git
