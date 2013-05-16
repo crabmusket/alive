@@ -46,6 +46,8 @@ The goal is to allow children to experience virtual interaction in a way that
 integrates with their existing curriculum, and focuses not just on digital
 creation, but digital enhancement of analog creation.
 
+The application is called Alive, because that is what it does to still images.
+
 ## Requirements
 
  * The application shall run in a (modern) web browser
@@ -62,6 +64,13 @@ creation, but digital enhancement of analog creation.
 The system was developed and deployed with the Processee graphics library, a
 wrapper over the Processing.js framework that encourages development in
 CoffeeScript.
+This involves the entire application living inside a web browser, taking
+advantage of the WebRTC standard to get a webcam video stream.
+
+The main application interface is a HTML page with the drawing canvas.
+The Processee library is included as static JavaScript.
+The actual application code is included as a CoffeeScript source file, which
+is compiled to JavaScript by the browser on page load.
 
 ## User experience
 
@@ -82,6 +91,14 @@ there is no mouse to observe changing.
 
 ## Algorithm design
 
+The algorithm design process was a case of testing what would work with different
+inputs and achieve the best results.
+Some aspects of the program, such as blob detection, are well-documented image
+analysis tools.
+
+## Algorithm implementation
+
+
 # System Evaluation
 
 ## Requirements fit
@@ -90,9 +107,8 @@ there is no mouse to observe changing.
 
 ## Framework
 
-I was personally disappointed with the workflow offered by Processing, Java,
-or Python's OpenCV bindings (the latter may have been to do with the quality of
-documentation as much as the API itself).
+I was personally disappointed with the workflow offered by Python's OpenCV
+bindings, Processing, or Java.
 This led to me creating Processee, a browser-based graphics environment which
 originated with Bret Victor's critique of the Processing environment.
 I believe this path gave me several advantages:
