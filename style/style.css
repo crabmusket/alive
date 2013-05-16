@@ -25,6 +25,10 @@ canvas:active, canvas:focus {
 	outline: none;
 }
 
+canvas:hover {
+	cursor: pointer;
+}
+
 .internals {
 	position: absolute;
 	top: 100%;
