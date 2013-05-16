@@ -1,0 +1,118 @@
+% COMP3419 Multimedia Assignment Report: Alive
+% Daniel Buckmaster
+% 
+
+# Background
+
+## Introduction
+
+Recent debates have questioned the role of ICT in early childhood development,
+especially in kindergartens.
+Some educators believe bringing technology into play too early is detrimental
+to the goals of an early education program:
+
+> We don't want them sitting in front of a computer screen or a TV.
+> They probably get enough of that at home.
+> What they need at the centre is to run around, do something physical.
+> Learn how to interact with other children.
+> In early childhood that's what's important.
+> The human touch.
+
+On the other hand, some children still lack the ability to practise digital
+literacy skills at home, even tasks as apparently-simple as learning to
+manipulate a mouse or a keyboard.
+University of Canberra researchers Anne Campbell and Grazia Scotellaro write:
+
+> Although some of these skills are used for playing games,
+> this is still an impressive array of digital literacy skills,
+> even more so when they have been acquired more through independent learning
+> and experimentation than through an adult providing instruction.
+
+The debate may continue, but it seems inevitable that children will be increasingly
+exposed to technology, whether at preschool, primary school, or at home.
+It is important, then, to thoughtfully devise their interactions with this technology,
+especially at the early childhood stage.
+We must support the existing goals and methods of early childhood education
+while providing new experiences.
+
+## Application
+
+I proposed and executed a visual 'toy' application that allows children to
+interact with their artwork once it is scanned into the computer via a webcam.
+The application detects distinct objects in a child's hand-painted image and
+animates them in a virtual scene reconstructed from the scanned image.
+
+The goal is to allow children to experience virtual interaction in a way that
+integrates with their existing curriculum, and focuses not just on digital
+creation, but digital enhancement of analog creation.
+
+## Requirements
+
+ * The application shall run in a (modern) web browser
+ * Automatic webcam detection
+ * Object detection based on colour and silhouette
+ * Non-realtime performance during image analysis
+ * Realtime performance during scene rendering
+ * Friendly user interface and experience
+
+# System Design
+
+## Processee drawing library
+
+The system was developed and deployed with the Processee graphics library, a
+wrapper over the Processing.js framework that encourages development in
+CoffeeScript.
+
+## User experience
+
+Since the application does not require detailed user interaction, the user
+interface is kept very simple.
+The chart below outlines the flow of the user's interaction with the program.
+Both 'button click' events are implemented as simple touch/click events on the
+main program window.
+This means there are no extraneous UI elements.
+
+ ![](system.jpg)
+
+The affordability of touching the main display was a question I considered during
+development; in the end, I settled for changing the mouse cursor when it was over
+the canvas.
+Unfortunately, this does not improve affordability for touch interfaces, since
+there is no mouse to observe changing.
+
+## Algorithm design
+
+# System Evaluation
+
+## Requirements fit
+
+## Performance
+
+## Framework
+
+I was personally disappointed with the workflow offered by Processing, Java,
+or Python's OpenCV bindings (the latter may have been to do with the quality of
+documentation as much as the API itself).
+This led to me creating Processee, a browser-based graphics environment which
+originated with Bret Victor's critique of the Processing environment.
+I believe this path gave me several advantages:
+
+ * CoffeeScript is a modern, flexible language which was easy to develop in
+ * I was developing in-browser, in the environment I would deploy in
+ * The framework was developed with the needs of a complex project in mind,
+   ensuring it was flexible and production-ready
+
+Of course, there were several disadvantages:
+
+ * Developing an entire API took a lot of effort that could have been focused
+   on developing algorithms and application code
+ * Not using any existing framework left me without any example code to adapt or
+   learn from
+
+Fortunately, I think that neither of these disadvantages exceeded my abilities.
+The Processee environment has become quite robust in the process, and I am very
+happy with the application I built on top of it.
+
+# Conclusion
+
+
