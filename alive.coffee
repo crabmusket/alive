@@ -27,6 +27,16 @@ processImage = ->
 	@copyImage
 		from: "webcam"
 		to: "capture"
+	@forEachPixelOf
+		image: "capture"
+		do: (pixel) ->
+			grey = (pixel.red + pixel.green + pixel.blue) / 3
+			dev = 0
+			dev += Math.abs(pixel.red - grey)
+			dev += Math.abs(pixel.green - grey)
+			dev += Math.abs(pixel.blue - grey)
+			#dev /= 3
+			gray: dev
 
 # foreground :: colour image
 #            -> background value
@@ -59,8 +69,6 @@ window.processee.run()
 ($ document).ready ->
 	win = $ window
 	canvas = $ '#processing'
-
-	window.positionOutput = ->
 
 	pageToCanvas = (e, t) ->
 		o = canvas.offset()
