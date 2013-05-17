@@ -2,34 +2,59 @@ window.processee.init()
 
 webcam = on
 
+# Setup stage
+# Set the canvas size, turn the webcam and so on.
 processee.setup ->
 	@canvasSize = width: 640, height: 480
 	@webcam = on
 	@webcamImageName = "webcam"
 
+# After setup
 processee.once ->
 	@makeNewImage
 		name: "capture"
 		copy: "webcam"
 
+# Frame update
+# Render either the stream from the webcam, or the animation if it's ready. Need
+# to sort out some sort of progress meter.
 processee.everyFrame ->
 	if webcam is on
 		@drawImage "webcam"
 	else
 		@drawImage "capture"
 
+# Click responder
+# Toggle between webcam and animation. Launch the image processing stuff when
+# we need to.
 processee.onClick ->
 	webcam = !webcam
 	if webcam is off
 		@do processImage
 
+# Processing step
+# Performs all the algorithms that turn the captured image into 
 processImage = ->
 	@copyImage
-		from: "webcam"
+		from: @do equalize @do foreground 128, "webcam"
 		to: "capture"
+
+# foreground :: colour image
+#            -> background value
+#            -> binary image where gray:1 is foreground
+# Uses a simple color threshold to determine which pixels are not 'background'.
+# In this case, the background is nearly white, so we sort of do an inverted
+# threshold. Note that 'binary image' in this case entails 0,0,0 and 1,0,0, not
+# 0,0,0 and 255,255,255.
+foreground = (bg, image) -> ->
 	@forEachPixelOf
+		image: image
+		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
+
+oldForeground = ->
+	@changeEachPixelOf
 		image: "capture"
-		do: (pixel) ->
+		to: (pixel) ->
 			grey = (pixel.red + pixel.green + pixel.blue) / 3
 			dev = 0
 			dev += Math.abs(pixel.red - grey)
@@ -37,17 +62,6 @@ processImage = ->
 			dev += Math.abs(pixel.blue - grey)
 			#dev /= 3
 			gray: dev
-
-# foreground :: colour image
-#            -> background value
-#            -> binary image where white is foreground
-# Uses a simple color threshold to determine which pixels are not 'background'.
-# In this case, the background is nearly white, so we sort of do an inverted
-# threshold.
-foreground = (bg, image) -> ->
-	@forEachPixelOf
-		image: image
-		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
 
 # blobs :: binary image
 #       -> list of bounds around connected white components
