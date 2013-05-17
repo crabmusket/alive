@@ -56,7 +56,7 @@ dilate = (image) -> ->
 
 window.processee.run()
 
-$ ->
+($ document).ready ->
 	win = $ window
 	canvas = $ '#processing'
 
