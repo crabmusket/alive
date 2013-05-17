@@ -56,13 +56,24 @@ foreground = (bg, image) -> ->
 blobs = (image) -> ->
 	# 
 
-# dilate :: binary image
+# dilate :: repetition count
+#        -> binary image
 #        -> binary image with white areas grown
 # We use this to expand the borders of our detected objects beyond what might
 # have been detected by the threshold, just in case (and to give a bit of
 # smoothness).
-dilate = (image) -> ->
-	# 
+dilate = (times, img) -> ->
+	if times <= 0 then return img
+	for n in [1..times]
+		@setEachPixelOf
+			image: img
+			to: (pixel) ->
+				if pixel.red > 250 then return pixel
+				anyWhites = no
+				@forEachNeighborOf pixel, (neigh) ->
+					if neigh.red > 250 then anyWhites = yes
+				if anyWhites then gray: 255 else pixel
+	return img
 
 window.processee.run()
 
