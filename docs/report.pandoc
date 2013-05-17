@@ -99,6 +99,15 @@ analysis tools.
 ## Algorithm implementation
 
 
+
+## Animations
+
+In order to keep the project manageable, the animations of each object after
+they had been detected were simple and frankly uninteresting.
+The first place to improve the system would be in these animations.
+Each animation is based on an 'inpulse' signal that is set whenever an object is
+touched by the mouse.
+
 # System Evaluation
 
 ## Requirements fit
