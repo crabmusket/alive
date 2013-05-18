@@ -6,21 +6,24 @@ webcam = on
 # Set the canvas size, turn the webcam and so on.
 processee.setup ->
 	@canvasSize = width: 640, height: 480
-	@webcam = on
-	@webcamImageName = "webcam"
+	#@webcam = on
+	#@webcamImageName = "webcam"
+	@loadImage "test/painting2.jpg"
 
 # After setup
 processee.once ->
 	@makeNewImage
 		name: "capture"
-		copy: "webcam"
+		#copy: "webcam"
+		copy: "test/painting2.jpg"
 
 # Frame update
 # Render either the stream from the webcam, or the animation if it's ready. Need
 # to sort out some sort of progress meter.
 processee.everyFrame ->
 	if webcam is on
-		@drawImage "webcam"
+		#@drawImage "webcam"
+		@drawImage "test/painting2.jpg"
 	else
 		@drawImage "capture"
 
@@ -36,7 +39,8 @@ processee.onClick ->
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
 	@copyImage
-		from: @do equalize @do foreground 128, "webcam"
+		from: @do oldForeground "test/painting2.jpg"
+		#from: @do equalize @do foreground 128, "webcam"
 		to: "capture"
 
 # foreground :: colour image
@@ -51,9 +55,9 @@ foreground = (bg, image) -> ->
 		image: image
 		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
 
-oldForeground = ->
-	@changeEachPixelOf
-		image: "capture"
+oldForeground = (img) -> ->
+	@setEachPixelOf
+		image: img
 		to: (pixel) ->
 			grey = (pixel.red + pixel.green + pixel.blue) / 3
 			dev = 0
@@ -62,6 +66,10 @@ oldForeground = ->
 			dev += Math.abs(pixel.blue - grey)
 			#dev /= 3
 			gray: dev
+
+threshold = (lvl, img) -> ->
+	@forEachPixelOf image: img, do: (p) ->
+		gray: (p.red + p.green + p.blue > lvl * 3) * 255
 
 # blobs :: binary image
 #       -> list of bounds around connected white components
@@ -79,15 +87,52 @@ blobs = (image) -> ->
 dilate = (times, img) -> ->
 	if times <= 0 then return img
 	for n in [1..times]
-		@setEachPixelOf
+		@forEachPixelOf
 			image: img
-			to: (pixel) ->
-				if pixel.red > 250 then return pixel
+			do: (pixel) ->
+				if pixel.red > 0 then return pixel
 				anyWhites = no
 				@forEachNeighborOf pixel, (neigh) ->
-					if neigh.red > 250 then anyWhites = yes
+					if neigh.red > 0 then anyWhites = yes
 				if anyWhites then gray: 255 else pixel
 	return img
+
+# equalize :: greyscale image
+#          -> full output range greyscale image
+# Does histogram equalisation on a greyscale image. Taken from example.
+equalize = (img) -> ->
+  # Determine the lowest and highest grey values.
+  min = 255
+  max = 0
+  @forEachPixelOf image: img, do: (pixel) ->
+    min = pixel.red if pixel.red < min
+    max = pixel.red if pixel.red > max
+  # Scale all pixels from min to max.
+  @forEachPixelOf image: img, do: (pixel) ->
+    gray: (pixel.red - min) / (max - min) * 255
+
+# greyscale :: colour image -> greyscale image
+# Pretty obvious.
+greyscale = (img) -> ->
+	@forEachPixelOf image: img, do: (pixel) ->
+		gray: (pixel.red + pixel.green + pixel.blue) / 3
+
+# edges :: greyscale image
+#       -> greyscale edges of image
+# Uses the Sobel operator to find the edges of an image based on first-order
+# differential convolution.
+edges = (img) -> ->
+	vert = @forEachPixelOf image: img, do: filters.convolveWith [
+		1,  2,  1,
+		0,   0,  0,
+		-1, -2, -1
+	]
+	horiz = @forEachPixelOf image: img, do: filters.convolveWith [
+		1,  0, -1,
+		2, 0, -2,
+		1,  0, -1
+	]
+	@do filters.combine [vert, horiz]
 
 window.processee.run()
 
