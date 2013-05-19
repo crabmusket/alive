@@ -19,19 +19,18 @@ window.blobs = (img) -> ->
 
 		# Decide which label to take, and whether to mark labels for merging.
 		label = switch
-			when labelWest > 0
+			when labelWest is 0 and labelNorth is 0
+				++labelMax
+			when labelWest > 0 and labelNorth is 0
+				labelWest
+			when labelNorth > 0 and labelWest is 0
+				labelNorth
+			when labelWest is labelNorth
 				labelWest
 			when labelWest > 0 and labelNorth > 0 and labelWest != labelNorth
-				min = Math.min labelWest, labelNorth
-				max = Math.max labelWest, labelNorth
-				equivalences.add max, min
-				min
-			when labelNorth > 0
-				labelNorth
-			else
-				++labelMax
-				equivalences.add labelMax, labelMax
-				labelMax
+				equivalences.add labelNorth, labelWest
+				equivalences.add labelWest, labelNorth
+				Math.min labelWest, labelNorth
 
 		# Reconstruct RGB values based on label we decided on.
 		labelled =
@@ -46,26 +45,21 @@ window.blobs = (img) -> ->
 	for label, eqs of equivalences.set
 		replacements[label] = (sort eqs)[0]
 
+	console.log labelMax, 'to', (v for k, v of replacements).unique().length
+
 	# Now start replacing labels!
 	@setEachPixelOf image: tmp, to: (p) ->
 		if p.red is 0 and p.green is 0 and p.blue is 0 then return p
 		label = p.red + (p.green << 8) + (p.blue << 16)
-		eq = replacements[label]
-		if eq?
+		if eq = replacements[label]
 			red:   (eq & 0x0000FF)
 			green: (eq & 0x00FF00) >>> 8
 			blue:  (eq & 0xFF0000) >>> 16
-		else
-			console.log 'loner!'
-			p
+		else p
 
 	return tmp
 
-Array::unique = ->
-  output = {}
-  output[@[key]] = @[key] for key in [0...@length]
-  value for key, value of output
-
+# Makes adding set relationships more convenient.
 class EquivalenceSet
 	constructor: -> @set = {}
 	add: (a, b) ->
@@ -73,4 +67,10 @@ class EquivalenceSet
 			if b not in @set[a]
 				@set[a].push b
 		else @set[a] = [b]
+
+# Uniquify an array.
+Array::unique = ->
+  output = {}
+  output[@[key]] = @[key] for key in [0...@length]
+  value for key, value of output
 
