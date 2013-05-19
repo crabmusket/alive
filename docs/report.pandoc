@@ -89,18 +89,28 @@ the canvas.
 Unfortunately, this does not improve affordability for touch interfaces, since
 there is no mouse to observe changing.
 
-## Algorithm design
+## Algorithm design and implementation
+
+### Process and innovation
 
 The algorithm design process was a case of testing what would work with different
 inputs and achieve the best results.
 Some aspects of the program, such as blob detection, are well-documented image
 analysis tools.
+Others, such as the method to determine what kind of animation might suit a given
+type of object (or cluster of objects) are my own invention.
 
-## Algorithm implementation
+ #. Separate 'objects' (in the foreground) from the background, which will be an off-white colour
+ #. Separate foreground into unique objects with a bounding region and a pixel mask
+ #. Cluster some objects and create Sprites
+ #. Reconstruct the scene with Sprites and a background colour
+ #. Render the scene with animations
 
+### Foreground and object detection
 
+### Object classification
 
-## Animations
+### Animation
 
 In order to keep the project manageable, the animations of each object after
 they had been detected were simple and frankly uninteresting.
