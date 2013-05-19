@@ -55,18 +55,6 @@ foreground = (bg, image) -> ->
 		image: image
 		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
 
-oldForeground = (img) -> ->
-	@setEachPixelOf
-		image: img
-		to: (pixel) ->
-			grey = (pixel.red + pixel.green + pixel.blue) / 3
-			dev = 0
-			dev += Math.abs(pixel.red - grey)
-			dev += Math.abs(pixel.green - grey)
-			dev += Math.abs(pixel.blue - grey)
-			#dev /= 3
-			gray: dev
-
 threshold = (lvl, img) -> ->
 	@forEachPixelOf image: img, do: (p) ->
 		gray: (p.red + p.green + p.blue > lvl * 3) * 255
@@ -86,16 +74,17 @@ blobs = (image) -> ->
 # smoothness).
 dilate = (times, img) -> ->
 	if times <= 0 then return img
+	tmp = @copyImage from: img
 	for n in [1..times]
-		@forEachPixelOf
-			image: img
-			do: (pixel) ->
+		@setEachPixelOf
+			image: tmp
+			to: (pixel) ->
 				if pixel.red > 0 then return pixel
 				anyWhites = no
 				@forEachNeighborOf pixel, (neigh) ->
 					if neigh.red > 0 then anyWhites = yes
-				if anyWhites then gray: 255 else pixel
-	return img
+				if anyWhites then gray: 1 else pixel
+	return tmp
 
 # equalize :: greyscale image
 #          -> full output range greyscale image
