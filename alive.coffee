@@ -39,7 +39,7 @@ processee.onClick ->
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
 	@copyImage
-		from: @do oldForeground "test/painting2.jpg"
+		from: @do blobs @do dilate 1, @do foreground 200, "test/painting2.jpg"
 		#from: @do equalize @do foreground 128, "webcam"
 		to: "capture"
 
@@ -62,9 +62,50 @@ threshold = (lvl, img) -> ->
 # blobs :: binary image
 #       -> list of bounds around connected white components
 # Uses the simple two-pass algorithm to break the binary islands into labeled
-# connected components.
-blobs = (image) -> ->
-	# 
+# connected components. http://en.wikipedia.org/wiki/Blob_extraction#Two-pass
+blobs = (img) -> ->
+	equivalences = new EquivalenceSet()
+	labelMax = 0
+	tmp = @copyImage from: img
+	@setEachPixelOf image: tmp, inPlace: true, to: (p) ->
+		# Don't consider 0 (background) pixels.
+		if p.red is 0 and p.green is 0 and p.blue is 0 then return p
+
+		# Get pixels and their labels (which are just the 24-bit numbers formed by
+		# their color channels).
+		north = @getPixel x: p.x, y: p.y-1, of: tmp
+		west  = @getPixel x: p.x-1, y: p.y, of: tmp
+		labelNorth = north.red + (north.green << 8) + (north.blue << 16)
+		labelWest  = west.red + (west.green << 8) + (west.blue << 16)
+
+		# Decide which label to take, and whether to mark labels for merging.
+		label = switch
+			when labelWest > 0 and labelNorth > 0 and labelWest != labelNorth
+				equivalences.add labelWest, labelNorth
+				Math.min labelWest, labelNorth
+			when labelWest > 0
+				labelWest
+			when labelNorth > 0
+				labelNorth
+			else
+				++labelMax
+				equivalences.add labelMax, labelMax
+				labelMax
+
+		# Reconstruct RGB values based on label we decided on.
+		labelled =
+			red:   (label & 0x0000FF)
+			green: (label & 0x00FF00) >>> 8
+			blue:  (label & 0xFF0000) >>> 16
+	return tmp
+
+class EquivalenceSet
+	constructor: -> @set = {}
+	add: (a, b) ->
+		if @set[a]?
+			if b not in @set[a]
+				@set[a].push b
+		else @set[a] = [b]
 
 # dilate :: repetition count
 #        -> binary image
