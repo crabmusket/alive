@@ -38,20 +38,34 @@ window.blobs = (img) -> ->
 			green: (label & 0x00FF00) >>> 8
 			blue:  (label & 0xFF0000) >>> 16
 	
+	regions = {}
+
 	# Now start replacing labels!
 	@setEachPixelOf image: tmp, to: (p) ->
 		# Again, ignore background pixels.
 		if p.red is 0 and p.green is 0 and p.blue is 0 then return p
-		# Reconstruct this pixel's label.
+
+		# Reconstruct this pixel's label and find the set it should belong to.
 		label = p.red + (p.green << 8) + (p.blue << 16)
-		# See if we need to merge it with anything.
-		if (eq = equivalences.find label)?
+		eq = equivalences.find label
+
+		# Push out the boundaries of this current label.
+		region = regions[eq]
+		if region?
+			region.min = x: Math.min(p.x, region.min.x), y: Math.min(p.y, region.min.y)
+			region.max = x: Math.max(p.x, region.max.x), y: Math.max(p.y, region.max.y)
+		else
+			regions[eq] =
+				min: { x: p.x, y: p.y }
+				max: { x: p.x, y: p.y }
+
+		return {
 			red:   (eq & 0x0000FF)
 			green: (eq & 0x00FF00) >>> 8
 			blue:  (eq & 0xFF0000) >>> 16
-		else p
+		}
 
-	return tmp
+	return [tmp, regions]
 
 # Makes adding set relationships more convenient.
 class UnionFind
@@ -68,7 +82,8 @@ class UnionFind
 		return undefined
 	# Return the representative of the list (set) with a given element in it.
 	find: (a) -> if s = @setWith a then s[0] else undefined
-	# Merge two lists (sets) that contain the given items.
+	# Merge two lists (sets) that contain the given items. The performance is
+	# terrible, this needs like 4 O(n) lookups not to mention list concatenation.
 	merge: (a, b) ->
 		sa = @setWith a
 		sb = @setWith b

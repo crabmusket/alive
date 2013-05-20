@@ -10,14 +10,12 @@ destination = "capture"
 processee.setup ->
 	@canvasSize = width: 640, height: 480
 	#@webcam = on
-	#@webcamImageName = "webcam"
-	@loadImage source
+	@loadImage source #@webcamImageName = source
 
 # After setup
 processee.once ->
 	@makeNewImage
 		name: destination
-		#copy: "webcam"
 		copy: source
 
 # Click responder
@@ -31,9 +29,9 @@ processee.onClick ->
 # Processing step
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
+	[blobbed, window.regions] = @do blobs @do dilate 1, @do foreground 200, source
 	@copyImage
-		from: @do blobs @do dilate 1, @do foreground 200, source
-		#from: @do equalize @do foreground 128, "webcam"
+		from: blobbed
 		to: destination
 
 # Frame update
@@ -44,6 +42,12 @@ processee.everyFrame ->
 		@drawImage source
 	else
 		@drawImage destination
+		for l, r of window.regions
+			@fillColor = alpha: 0
+			@strokeColor = red: 255
+			@drawRect
+				min: r.min
+				max: r.max
 
 # foreground :: colour image
 #            -> background value
