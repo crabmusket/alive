@@ -10,3 +10,30 @@ window.foreground = (bg, img) -> ->
 		image: img
 		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
 
+window.toHue = (img) -> ->
+	@forEachPixelOf
+		image: img
+		do: (p) -> gray: (rgb2hsv p)[0] * 255 / 360
+
+rgb2hsv = (p) ->
+	h = 0
+	s = 0
+	v = 0
+	r = p.red / 255
+	g = p.green / 255
+	b = p.blue / 255
+
+	min = Math.min r, Math.min g, b
+	max = Math.max r, Math.max g, b
+
+	if min is max
+		return [0, 0, min]
+
+	d = if r is min then g-b else (if b is min then r-g else b-r)
+	h = if r is min then 3 else (if b is min then 1 else 5)
+
+	return [
+		60* (h - d / (max - min))
+		(max - min) / max
+		max
+	]
