@@ -2,30 +2,23 @@ window.processee.init()
 
 webcam = on
 
+source = "test/painting1.jpg"
+destination = "capture"
+
 # Setup stage
 # Set the canvas size, turn the webcam and so on.
 processee.setup ->
 	@canvasSize = width: 640, height: 480
 	#@webcam = on
 	#@webcamImageName = "webcam"
-	@loadImage "test/painting2.jpg"
+	@loadImage source
 
 # After setup
 processee.once ->
 	@makeNewImage
-		name: "capture"
+		name: destination
 		#copy: "webcam"
-		copy: "test/painting2.jpg"
-
-# Frame update
-# Render either the stream from the webcam, or the animation if it's ready. Need
-# to sort out some sort of progress meter.
-processee.everyFrame ->
-	if webcam is on
-		#@drawImage "webcam"
-		@drawImage "test/painting2.jpg"
-	else
-		@drawImage "capture"
+		copy: source
 
 # Click responder
 # Toggle between webcam and animation. Launch the image processing stuff when
@@ -39,9 +32,18 @@ processee.onClick ->
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
 	@copyImage
-		from: @do blobs @do dilate 1, @do foreground 200, "test/painting2.jpg"
+		from: @do blobs @do dilate 1, @do foreground 200, source
 		#from: @do equalize @do foreground 128, "webcam"
-		to: "capture"
+		to: destination
+
+# Frame update
+# Render either the stream from the webcam, or the animation if it's ready. Need
+# to sort out some sort of progress meter.
+processee.everyFrame ->
+	if webcam is on
+		@drawImage source
+	else
+		@drawImage destination
 
 # foreground :: colour image
 #            -> background value
@@ -50,9 +52,9 @@ processImage = ->
 # In this case, the background is nearly white, so we sort of do an inverted
 # threshold. Note that 'binary image' in this case entails 0,0,0 and 1,0,0, not
 # 0,0,0 and 255,255,255.
-foreground = (bg, image) -> ->
+foreground = (bg, img) -> ->
 	@forEachPixelOf
-		image: image
+		image: img
 		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
 
 threshold = (lvl, img) -> ->
