@@ -15,10 +15,8 @@ window.toHue = (img) -> ->
 		image: img
 		do: (p) -> gray: (rgb2hsv p)[0] * 255 / 360
 
+# Based on http://www.javascripter.net/faq/rgb2hsv.htm
 rgb2hsv = (p) ->
-	h = 0
-	s = 0
-	v = 0
 	r = p.red / 255
 	g = p.green / 255
 	b = p.blue / 255
