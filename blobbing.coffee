@@ -1,5 +1,6 @@
 # blobs :: binary image
 #       -> list of bounds around connected white components
+#          and the blobbed image
 # Uses the simple two-pass algorithm to break the binary islands into labeled
 # connected components. http://en.wikipedia.org/wiki/Blob_extraction#Two-pass
 window.blobs = (img) -> ->
