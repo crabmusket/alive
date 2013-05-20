@@ -3,7 +3,7 @@
 # Uses the simple two-pass algorithm to break the binary islands into labeled
 # connected components. http://en.wikipedia.org/wiki/Blob_extraction#Two-pass
 window.blobs = (img) -> ->
-	equivalences = new EquivalenceSet()
+	equivalences = new UnionFind()
 	labelMax = 0
 	tmp = @copyImage from: img
 	@setEachPixelOf image: tmp, inPlace: yes, to: (p) ->
@@ -15,12 +15,13 @@ window.blobs = (img) -> ->
 		north = @getPixel x: p.x, y: p.y-1, of: tmp
 		west  = @getPixel x: p.x-1, y: p.y, of: tmp
 		labelNorth = north.red + (north.green << 8) + (north.blue << 16)
-		labelWest  = west.red + (west.green << 8) + (west.blue << 16)
+		labelWest  = west.red  + (west.green  << 8) + (west.blue  << 16)
 
 		# Decide which label to take, and whether to mark labels for merging.
 		label = switch
 			when labelWest is 0 and labelNorth is 0
-				++labelMax
+				equivalences.add ++labelMax
+				labelMax
 			when labelWest > 0 and labelNorth is 0
 				labelWest
 			when labelNorth > 0 and labelWest is 0
@@ -28,8 +29,7 @@ window.blobs = (img) -> ->
 			when labelWest is labelNorth
 				labelWest
 			when labelWest > 0 and labelNorth > 0 and labelWest != labelNorth
-				equivalences.add labelNorth, labelWest
-				equivalences.add labelWest, labelNorth
+				equivalences.merge labelWest, labelNorth
 				Math.min labelWest, labelNorth
 
 		# Reconstruct RGB values based on label we decided on.
@@ -38,20 +38,14 @@ window.blobs = (img) -> ->
 			green: (label & 0x00FF00) >>> 8
 			blue:  (label & 0xFF0000) >>> 16
 	
-	# Now construct the equivalency mapping. At the moment, each label has a big
-	# list of labels it's equivalent to. We reduce that to a 1-to-1 mapping so we
-	# can actually start replacing labels.
-	replacements = {}
-	for label, eqs of equivalences.set
-		replacements[label] = (sort eqs)[0]
-
-	console.log labelMax, 'to', (v for k, v of replacements).unique().length
-
 	# Now start replacing labels!
 	@setEachPixelOf image: tmp, to: (p) ->
+		# Again, ignore background pixels.
 		if p.red is 0 and p.green is 0 and p.blue is 0 then return p
+		# Reconstruct this pixel's label.
 		label = p.red + (p.green << 8) + (p.blue << 16)
-		if eq = replacements[label]
+		# See if we need to merge it with anything.
+		if (eq = equivalences.find label)?
 			red:   (eq & 0x0000FF)
 			green: (eq & 0x00FF00) >>> 8
 			blue:  (eq & 0xFF0000) >>> 16
@@ -60,17 +54,27 @@ window.blobs = (img) -> ->
 	return tmp
 
 # Makes adding set relationships more convenient.
-class EquivalenceSet
-	constructor: -> @set = {}
-	add: (a, b) ->
-		if @set[a]?
-			if b not in @set[a]
-				@set[a].push b
-		else @set[a] = [b]
-
-# Uniquify an array.
-Array::unique = ->
-  output = {}
-  output[@[key]] = @[key] for key in [0...@length]
-  value for key, value of output
+class UnionFind
+	constructor: -> @sets = []
+	# Start a new list (set) containing only the given element.
+	add: (a) -> @sets.push [a]
+	# Remove the list (set) represented by the the given element.
+	remove: (a) -> @sets = @sets.filter (s) -> s[0] != a
+	# Return the list (set) with a given element in it.
+	setWith: (a) ->
+		for s in @sets
+			if a in s
+				return s
+		return undefined
+	# Return the representative of the list (set) with a given element in it.
+	find: (a) -> if s = @setWith a then s[0] else undefined
+	# Merge two lists (sets) that contain the given items.
+	merge: (a, b) ->
+		sa = @setWith a
+		sb = @setWith b
+		if sa is sb then return
+		list = sa.concat sb
+		@remove sa[0]
+		@remove sb[0]
+		@sets.push sort list
 
