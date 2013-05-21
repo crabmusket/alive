@@ -41,7 +41,7 @@ processImage = ->
 	# Extract blobs from the separated image.
 	[blobbed, window.regions] = @do blobs separated
 	@copyImage
-		from: source
+		from: blobbed
 		to: destination
 
 # Frame update
@@ -55,50 +55,6 @@ processee.everyFrame ->
 		@fillColor = alpha: 0
 		@strokeColor = red: 255
 		@drawRect r for l, r of window.regions
-
-threshold = (lvl, img) -> ->
-	@forEachPixelOf image: img, do: (p) ->
-		gray: (p.red + p.green + p.blue > lvl * 3) * 255
-
-# dilate :: repetition count
-#        -> binary image
-#        -> binary image with white areas grown
-# We use this to expand the borders of our detected objects beyond what might
-# have been detected by the threshold, just in case (and to give a bit of
-# smoothness).
-dilate = (times, img) -> ->
-	if times <= 0 then return img
-	tmp = @copyImage from: img
-	for n in [1..times]
-		@setEachPixelOf
-			image: tmp
-			to: (pixel) ->
-				if pixel.red > 0 then return pixel
-				anyWhites = no
-				@forEachNeighborOf pixel, (neigh) ->
-					if neigh.red > 0 then anyWhites = yes
-				if anyWhites then gray: 1 else pixel
-	return tmp
-
-# equalize :: greyscale image
-#          -> full output range greyscale image
-# Does histogram equalisation on a greyscale image. Taken from example.
-equalize = (img) -> ->
-  # Determine the lowest and highest grey values.
-  min = 255
-  max = 0
-  @forEachPixelOf image: img, do: (pixel) ->
-    min = pixel.red if pixel.red < min
-    max = pixel.red if pixel.red > max
-  # Scale all pixels from min to max.
-  @forEachPixelOf image: img, do: (pixel) ->
-    gray: (pixel.red - min) / (max - min) * 255
-
-# greyscale :: colour image -> greyscale image
-# Pretty obvious.
-greyscale = (img) -> ->
-	@forEachPixelOf image: img, do: (pixel) ->
-		gray: (pixel.red + pixel.green + pixel.blue) / 3
 
 window.processee.run()
 

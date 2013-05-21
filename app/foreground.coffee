@@ -1,23 +1,16 @@
-# foreground :: colour image
-#            -> background value
-#            -> binary image where gray:1 is foreground
 # Uses a simple color threshold to determine which pixels are not 'background'.
 # In this case, the background is nearly white, so we sort of do an inverted
-# threshold. Note that 'binary image' in this case entails 0,0,0 and 1,0,0, not
-# 0,0,0 and 255,255,255.
+# threshold.
 window.foreground = (bg, img) -> ->
 	@forEachPixelOf
 		image: img
 		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
 
-window.toHue = (img) -> ->
-	@forEachPixelOf
-		image: img
-		do: (p) -> gray: (rgb2hsv p)[0] * 255 / 360
+window.threshold = (lvl, img) -> ->
+	@forEachPixelOf image: img, do: (p) ->
+		gray: (p.red + p.green + p.blue > lvl * 3) * 255
 
-# edges :: greyscale image
-#       -> greyscale edges of image
-# Uses the Sobel operator to find the edges of an image based on first-order
+# Use the Sobel operator to find the edges of an image based on first-order
 # differential convolution. We use just addition to combine the two passes rather
 # than vector distance.
 window.edges = (img) -> ->
@@ -32,6 +25,67 @@ window.edges = (img) -> ->
 		1,  0, -1
 	]
 	@do filters.add [vert, horiz]
+
+# Median blur.
+window.median = (img) -> ->
+	@forEachPixelOf image: img, do: (pixel) ->
+		reds = []
+		greens = []
+		blues = []
+		@forEachNeighborOf pixel, (n) ->
+			reds.push n.red
+			greens.push n.green
+			blues.push n.blue
+		reds = sort reds
+		greens = sort greens
+		blues = sort blues
+		red: reds[4], green: greens[4], blue: blues[4]
+
+# dilate :: repetition count
+#        -> binary image
+#        -> binary image with white areas grown
+# We use this to expand the borders of our detected objects beyond what might
+# have been detected by the threshold, just in case (and to give a bit of
+# smoothness).
+window.dilate = (times, img) -> ->
+	if times <= 0 then return img
+	tmp = @copyImage from: img
+	for n in [1..times]
+		@setEachPixelOf
+			image: tmp
+			to: (pixel) ->
+				if pixel.red > 0 then return pixel
+				anyWhites = no
+				@forEachNeighborOf pixel, (neigh) ->
+					if neigh.red > 0 then anyWhites = yes
+				if anyWhites then gray: 1 else pixel
+	return tmp
+
+# equalize :: greyscale image
+#          -> full output range greyscale image
+# Does histogram equalisation on a greyscale image. Taken from example.
+window.equalize = (img) -> ->
+  # Determine the lowest and highest grey values.
+  min = 255
+  max = 0
+  @forEachPixelOf image: img, do: (pixel) ->
+    min = pixel.red if pixel.red < min
+    max = pixel.red if pixel.red > max
+  # Scale all pixels from min to max.
+  @forEachPixelOf image: img, do: (pixel) ->
+    gray: (pixel.red - min) / (max - min) * 255
+
+# greyscale :: colour image -> greyscale image
+# Pretty obvious.
+window.greyscale = (img) -> ->
+	@forEachPixelOf image: img, do: (pixel) ->
+		gray: (pixel.red + pixel.green + pixel.blue) / 3
+
+# Converts a colour image to a greyscale representation of the hue of each pixel.
+window.toHue = (img) -> ->
+	@forEachPixelOf
+		image: img
+		do: (p) -> gray: (rgb2hsv p)[0] / 360 * 255
 
 # Based on http://www.javascripter.net/faq/rgb2hsv.htm
 rgb2hsv = (p) ->
@@ -53,17 +107,3 @@ rgb2hsv = (p) ->
 		(max - min) / max
 		max
 	]
-
-window.median = (img) -> ->
-	@forEachPixelOf image: img, do: (pixel) ->
-		reds = []
-		greens = []
-		blues = []
-		@forEachNeighborOf pixel, (n) -> reds.push n.red
-		@forEachNeighborOf pixel, (n) -> greens.push n.green
-		@forEachNeighborOf pixel, (n) -> blues.push n.blue
-		reds = sort reds
-		greens = sort greens
-		blues = sort blues
-		return red: reds[4], green: greens[4], blue: blues[4]
-
