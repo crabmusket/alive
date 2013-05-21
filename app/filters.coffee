@@ -4,7 +4,7 @@
 window.foreground = (bg, img) -> ->
 	@forEachPixelOf
 		image: img
-		do: (pixel) -> gray: (pixel.red < bg or pixel.green < bg or pixel.blue < bg)
+		do: (pixel) -> gray: (pixel.red < bg.red or pixel.green < bg.green or pixel.blue < bg.blue)
 
 window.threshold = (lvl, img) -> ->
 	@forEachPixelOf image: img, do: (p) ->

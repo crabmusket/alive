@@ -1,9 +1,8 @@
-# blobs :: binary image
-#       -> list of bounds around connected white components
-#          and the blobbed image
 # Uses the simple two-pass algorithm to break the binary islands into labeled
 # connected components. http://en.wikipedia.org/wiki/Blob_extraction#Two-pass
-window.blobs = (img) -> ->
+# The col argument is the hue image, which is used to determine a region's
+# median hue.
+window.blobs = (col, img) -> ->
 	equivalences = new UnionFind()
 	labelMax = 0
 	tmp = @copyImage from: img
@@ -50,22 +49,29 @@ window.blobs = (img) -> ->
 		label = p.red + (p.green << 8) + (p.blue << 16)
 		eq = equivalences.find label
 
+		hue = (@getPixel x: p.x, y: p.y, of: col).red
 		# Push out the boundaries of this current label.
 		region = regions[eq]
 		if region?
 			region.min = x: Math.min(p.x, region.min.x), y: Math.min(p.y, region.min.y)
 			region.max = x: Math.max(p.x, region.max.x), y: Math.max(p.y, region.max.y)
+			region.hue.push hue
 		else
 			# Construct a new region if it wasn't present.
 			regions[eq] =
 				min: { x: p.x, y: p.y }
 				max: { x: p.x, y: p.y }
+				hue: [hue]
 
 		# Decompose the new label inro RGB components.
 		newlabel =
 			red:   (eq & 0x0000FF)
 			green: (eq & 0x00FF00) >>> 8
 			blue:  (eq & 0xFF0000) >>> 16
+
+	# Find median hue values.
+	for l, r of regions
+		r.hue = (sort r.hue)[Math.floor r.hue.length/2]
 
 	# Entire function returns both the blobbed image and the regions discovered.
 	return [tmp, regions]

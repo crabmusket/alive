@@ -35,11 +35,16 @@ window.mergeOverlapping = (regions) -> ->
 			for l2, r2 of regions
 				if l1 is l2 then continue
 				if intersecting r1, r2
+					# Get angular difference in region hue.
+					a = r2.hue - r1.hue
+					a = (a + 128) % 255 - 128					
+					# Get overlap area.
 					a1 = area r1
 					a2 = area r2
 					am = Math.min a1, a2
 					lap = area overlap r1, r2
-					if lap > 0.4 * Math.min a1, a2
+					# Merge if overlapping a lot, or close in colour.
+					if lap > 0.4 * Math.min a1, a2 or a < 20
 						changed = yes
 						r1.min.x = Math.min r1.min.x, r2.min.x
 						r1.min.y = Math.min r1.min.y, r2.min.y
