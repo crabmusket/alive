@@ -29,9 +29,19 @@ processee.onClick ->
 # Processing step
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
-	[blobbed, window.regions] = @do blobs @do dilate 1, @do foreground 200, source
+	# Get a binary image of separated foreground elements. We subtract the colour
+	# separation from the foreground representation to create borders of background
+	# between objects of different colours.
+	separated = @do filters.sub [
+		# Foreground detection: simply chose objects that are not white!
+		fgsep = @do dilate 1, @do equalize @do foreground 200, source
+		# Colour separation: convert image to hue representation then find borders.
+		colsep = @do edges @do median @do toHue source
+	]
+	# Extract blobs from the separated image.
+	[blobbed, window.regions] = @do blobs separated
 	@copyImage
-		from: blobbed
+		from: source
 		to: destination
 
 # Frame update
@@ -44,8 +54,7 @@ processee.everyFrame ->
 		@drawImage destination
 		@fillColor = alpha: 0
 		@strokeColor = red: 255
-		for l, r of window.regions
-			@drawRect r
+		@drawRect r for l, r of window.regions
 
 threshold = (lvl, img) -> ->
 	@forEachPixelOf image: img, do: (p) ->

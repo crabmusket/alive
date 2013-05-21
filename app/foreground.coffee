@@ -31,7 +31,7 @@ window.edges = (img) -> ->
 		2, 0, -2,
 		1,  0, -1
 	]
-	@do filters.combine [vert, horiz]
+	@do filters.add [vert, horiz]
 
 # Based on http://www.javascripter.net/faq/rgb2hsv.htm
 rgb2hsv = (p) ->
