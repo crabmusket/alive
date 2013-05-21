@@ -42,12 +42,10 @@ processee.everyFrame ->
 		@drawImage source
 	else
 		@drawImage destination
+		@fillColor = alpha: 0
+		@strokeColor = red: 255
 		for l, r of window.regions
-			@fillColor = alpha: 0
-			@strokeColor = red: 255
-			@drawRect
-				min: r.min
-				max: r.max
+			@drawRect r
 
 threshold = (lvl, img) -> ->
 	@forEachPixelOf image: img, do: (p) ->
