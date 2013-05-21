@@ -29,6 +29,10 @@ processee.onClick ->
 # Processing step
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
+	# Freeze the webcam frame.
+	@copyImage
+		from: source
+		to: destination
 	# Get a binary image of separated foreground elements. We subtract the colour
 	# separation from the foreground representation to create borders of background
 	# between objects of different colours.
@@ -39,10 +43,7 @@ processImage = ->
 		colsep = @do edges @do median @do toHue source
 	]
 	# Extract blobs from the separated image.
-	[blobbed, window.regions] = @do blobs separated
-	@copyImage
-		from: blobbed
-		to: destination
+	[blobbed, regions] = @do blobs separated
 
 # Frame update
 # Render either the stream from the webcam, or the animation if it's ready. Need

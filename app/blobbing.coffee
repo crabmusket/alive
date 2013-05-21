@@ -56,33 +56,40 @@ window.blobs = (img) -> ->
 			region.min = x: Math.min(p.x, region.min.x), y: Math.min(p.y, region.min.y)
 			region.max = x: Math.max(p.x, region.max.x), y: Math.max(p.y, region.max.y)
 		else
+			# Construct a new region if it wasn't present.
 			regions[eq] =
 				min: { x: p.x, y: p.y }
 				max: { x: p.x, y: p.y }
 
-		return {
+		# Decompose the new label inro RGB components.
+		newlabel =
 			red:   (eq & 0x0000FF)
 			green: (eq & 0x00FF00) >>> 8
 			blue:  (eq & 0xFF0000) >>> 16
-		}
 
+	# Entire function returns both the blobbed image and the regions discovered.
 	return [tmp, regions]
 
 # Makes adding set relationships more convenient.
 class UnionFind
 	constructor: -> @sets = []
+
 	# Start a new list (set) containing only the given element.
 	add: (a) -> @sets.push [a]
+
 	# Remove the list (set) represented by the the given element.
 	remove: (a) -> @sets = @sets.filter (s) -> s[0] != a
+
 	# Return the list (set) with a given element in it.
 	setWith: (a) ->
 		for s in @sets
 			if a in s
 				return s
 		return undefined
+
 	# Return the representative of the list (set) with a given element in it.
 	find: (a) -> if s = @setWith a then s[0] else undefined
+
 	# Merge two lists (sets) that contain the given items. The performance is
 	# terrible, this needs like 4 O(n) lookups not to mention list concatenation.
 	merge: (a, b) ->
