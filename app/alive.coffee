@@ -42,7 +42,7 @@ processImage = ->
 		# Foreground detection: simply chose objects that are not white!
 		fgsep = @do dilate 1, @do equalize @do foreground 200, source
 		# Colour separation: convert image to hue representation then find borders.
-		colsep = @do edges @do median @do toHue source
+		colsep = @do threshold 50, @do edges @do median @do toHue source
 	]
 	# Extract blobs from the separated image.
 	[blobbed, regions] = @do blobs separated
