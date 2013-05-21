@@ -91,23 +91,6 @@ greyscale = (img) -> ->
 	@forEachPixelOf image: img, do: (pixel) ->
 		gray: (pixel.red + pixel.green + pixel.blue) / 3
 
-# edges :: greyscale image
-#       -> greyscale edges of image
-# Uses the Sobel operator to find the edges of an image based on first-order
-# differential convolution.
-edges = (img) -> ->
-	vert = @forEachPixelOf image: img, do: filters.convolveWith [
-		1,  2,  1,
-		0,   0,  0,
-		-1, -2, -1
-	]
-	horiz = @forEachPixelOf image: img, do: filters.convolveWith [
-		1,  0, -1,
-		2, 0, -2,
-		1,  0, -1
-	]
-	@do filters.combine [vert, horiz]
-
 window.processee.run()
 
 ($ document).ready ->

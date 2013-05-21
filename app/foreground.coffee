@@ -15,6 +15,24 @@ window.toHue = (img) -> ->
 		image: img
 		do: (p) -> gray: (rgb2hsv p)[0] * 255 / 360
 
+# edges :: greyscale image
+#       -> greyscale edges of image
+# Uses the Sobel operator to find the edges of an image based on first-order
+# differential convolution. We use just addition to combine the two passes rather
+# than vector distance.
+window.edges = (img) -> ->
+	vert = @forEachPixelOf image: img, do: filters.convolveWith [
+		1,  2,  1,
+		0,   0,  0,
+		-1, -2, -1
+	]
+	horiz = @forEachPixelOf image: img, do: filters.convolveWith [
+		1,  0, -1,
+		2, 0, -2,
+		1,  0, -1
+	]
+	@do filters.combine [vert, horiz]
+
 # Based on http://www.javascripter.net/faq/rgb2hsv.htm
 rgb2hsv = (p) ->
 	r = p.red / 255
