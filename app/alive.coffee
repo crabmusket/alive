@@ -47,7 +47,7 @@ processImage = ->
 	# Extract blobs from the separated image.
 	[blobbed, regions] = @do blobs separated
 	# Convert regions to objects on the canvas.
-	for l, r of @do rejectRegionsBySize regions
+	for l, r of @do mergeContained @do rejectRegionsBySize regions
 		processee.object new Sprite r
 
 # Frame update

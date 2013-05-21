@@ -13,3 +13,16 @@ window.rejectRegionsBySize = (regions) -> ->
 		result[l] = r
 	result
 
+# Merge regions that are entirely inside other regions. Don't really want them
+# to stick around as separate entities... deciding when to do that or not would
+# be incresibly difficult! So we just assume we'll always merge.
+window.mergeContained = (regions) -> ->
+	for l1, r1 of regions
+		for l2, r2 of regions
+			if l1 is l2 then continue
+			if contains r2, r1
+				delete regions[l2]
+	regions
+
+# Does r1 contain r2?
+contains = (r2, r1) -> r1.min.x < r2.min.x and r1.max.x > r2.max.x and r1.min.y < r2.min.y and r1.max.y > r2.max.y
