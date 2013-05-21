@@ -53,3 +53,17 @@ rgb2hsv = (p) ->
 		(max - min) / max
 		max
 	]
+
+window.median = (img) -> ->
+	@forEachPixelOf image: img, do: (pixel) ->
+		reds = []
+		greens = []
+		blues = []
+		@forEachNeighborOf pixel, (n) -> reds.push n.red
+		@forEachNeighborOf pixel, (n) -> greens.push n.green
+		@forEachNeighborOf pixel, (n) -> blues.push n.blue
+		reds = sort reds
+		greens = sort greens
+		blues = sort blues
+		return red: reds[4], green: greens[4], blue: blues[4]
+
