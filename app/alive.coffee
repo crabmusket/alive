@@ -25,6 +25,8 @@ processee.onClick ->
 	webcam = !webcam
 	if webcam is off
 		@do processImage
+	else
+		processee.clearObjects()
 
 # Processing step
 # Performs all the algorithms that turn the captured image into 
@@ -44,6 +46,9 @@ processImage = ->
 	]
 	# Extract blobs from the separated image.
 	[blobbed, regions] = @do blobs separated
+	# Convert regions to objects on the canvas.
+	for l, r of regions
+		processee.object new Sprite r
 
 # Frame update
 # Render either the stream from the webcam, or the animation if it's ready. Need
@@ -53,9 +58,6 @@ processee.everyFrame ->
 		@drawImage source
 	else
 		@drawImage destination
-		@fillColor = alpha: 0
-		@strokeColor = red: 255
-		@drawRect r for l, r of window.regions
 
 window.processee.run()
 
