@@ -214,7 +214,45 @@ flag is returned by the animation function.
 
 ## Requirements fit
 
+Overall, the system fits the requirements quite closely.
+The two biggest problems in the final animation produced are small fragmentary
+pieces that are not merged back into sensible objects, and objects that are
+merged too greedily.
+These are responsible for visual errors in the finished piece.
+
+For example, this cloud with its thin outlines is broken to pieces by the
+hue-boundary step, and is never fully recovered into a single object by merging.
+Unfortunately I could determine no solution for thin objects like these.
+
+ ![Thin outlines are handled poorly.](cloud.jpg)
+
+At the other end of the spectrum, this sun has merged with two of the clearly-separate
+ray objects, 
+
+ ![An inappropriately greedy merge.](sun.jpg)
+
 ## Performance
+
+Since realtime performance of the image processing algorithm was not required, I
+was fairly carefree with its performance.
+While I am not completely happy with the performance, I did not enter into any
+optimisation, since I had more important tasks for the project.
+There are some obvious performance-enhancing steps that could be taken both in
+my application code and in the Processee framework:
+
+ #. Reduce the number of new ImageData objects that are allocated by performing
+    more operations in-place
+ #. Optimise data structures such as the UnionFind class used in blob extraction
+ #. Take advantage of web workers to parallelise large pixel loops
+
+A more important performance improvement, however, would be to provide feedback
+while the algorithm is running, instead of leaving the UI unresponsive.
+Using web workers for more tasks, or even the entire image processing workload,
+would be ideal and allow the main thread to continue updating the UI.
+
+Realtime rendering performance of the reconstructed scene I have found to be acceptable.
+Rendering sprites from image buffers is reasonably fast, and their animation
+logic is not complicated.
 
 ## Framework and environment
 
@@ -229,7 +267,7 @@ I believe this path gave me several advantages:
  * The framework was developed with the needs of a complex project in mind,
    ensuring it was flexible and production-ready
 
-Of course, there were several disadvantages:
+Of course, there were downsides:
 
  * Developing an entire API took a lot of effort that could have been focused
    on developing algorithms and application code
@@ -240,7 +278,7 @@ Fortunately, I think that neither of these disadvantages exceeded my abilities.
 The Processee environment has become quite robust in the process, and I am very
 happy with the application I built on top of it.
 
-The decision to use CoffeeScript was also a double-edged sword.
+Using CoffeeScript was also a double-edged sword.
 While I was especially happy with the functional style the language allowed me
 to adopt (for example, the chained `@do` calls in the image processing steps),
 the way CoffeeScript was included in the application (compiled client-side from
