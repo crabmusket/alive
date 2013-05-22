@@ -1,9 +1,13 @@
 window.processee.init()
 
-webcam = on
+stages =
+	capture: 0
+	process: 1
+	render: 2
+stage = stages.capture
 
-source = "test/painting1.jpg"
-destination = "capture"
+window.source = "test/painting1.jpg"
+window.destination = "capture"
 
 # Setup stage
 # Set the canvas size, turn the webcam and so on.
@@ -22,11 +26,13 @@ processee.once ->
 # Toggle between webcam and animation. Launch the image processing stuff when
 # we need to.
 processee.onClick ->
-	webcam = !webcam
-	if webcam is off
-		@do processImage
-	else
-		processee.clearObjects()
+	switch stage
+		when stages.capture
+			stage = stages.process
+			@do processImage
+		when stages.render
+			stage = stages.capture
+			processee.clearObjects()
 
 # Processing step
 # Performs all the algorithms that turn the captured image into 
@@ -50,15 +56,17 @@ processImage = ->
 	@copyImage
 		from: source
 		to: destination
+	stage = stages.render
 
 # Frame update
 # Render either the stream from the webcam, or the animation if it's ready. Need
 # to sort out some sort of progress meter.
 processee.everyFrame ->
-	if webcam is on
-		@drawImage source
-	else
-		@drawImage destination
+	switch stage
+		when stages.capture
+			@drawImage source
+		when stages.render
+			@drawImage destination
 
 window.processee.run()
 
