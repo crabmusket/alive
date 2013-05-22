@@ -21,5 +21,9 @@
 		el = ($ 'form input[type=radio]:checked')
 		window.source = el.val()
 
+	($ 'form #bounds').change ->
+		el = ($ 'form #bounds')
+		window.bounds = el.is ':checked'
+
 	($ '.webcam').toggle(false)
 

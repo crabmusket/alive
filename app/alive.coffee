@@ -8,6 +8,7 @@ stage = stages.capture
 
 window.source = "test/painting1.jpg"
 window.destination = "capture"
+window.bounds = no
 
 # Setup stage
 # Set the canvas size, turn the webcam and so on.

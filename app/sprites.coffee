@@ -1,11 +1,14 @@
 # Represents an object on the canvas.
 window.Sprite = class Sprite
 	constructor: (@region) ->
+
 	draw: (self) ->
 		@at x: self.region.min.x, y: self.region.min.y, -> @drawImage self.sprite
-		@fillColor = alpha: 0
-		@strokeColor = if within self.region, @mouse then green: 255 else red: 255
-		@drawRect self.region
+		if window.bounds
+			@fillColor = alpha: 0
+			@strokeColor = if within self.region, @mouse then green: 255 else red: 255
+			@drawRect self.region
+
 	init: (img) -> (self) ->
 		r = self.region
 		# Copy piece of source image to a new buffer for this sprite to render with.
