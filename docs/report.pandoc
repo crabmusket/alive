@@ -169,11 +169,10 @@ The entire step looks like this:
 colsep = @do edges @do median (col = @do toHue source)
 ```
 
-When combined, these two steps give far greater object discrimination than either
-of them alone. The small flowers in the first example image are a fantastic
-case study:
+When the hue-boundary pass is subtracted from the foreground pass, these two
+steps give far greater object discrimination than either of them alone:
 
- ![Left: original image. Centre: blobs with foreground detection only. Right: blobs with hue boundary.](huecomp.jpg)
+ ![Left: blobs with foreground detection only. Right: blobs with hue boundary.](huecomp.jpg)
 
 ### Object extraction and merging
 
