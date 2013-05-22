@@ -244,9 +244,9 @@ optimisation, since I had more important tasks for the project.
 There are some obvious performance-enhancing steps that could be taken both in
 my application code and in the Processee framework:
 
- #. Reduce the number of new ImageData objects that are allocated by performing
-    more operations in-place
- #. Optimise data structures such as the UnionFind class used in blob extraction
+ #. Reduce the number of new `ImageData` objects that are allocated by performing
+    more operations in-place on existing images
+ #. Optimise data structures such as the `UnionFind` class used in blob extraction
  #. Take advantage of web workers to parallelise large pixel loops
 
 A more important performance improvement, however, would be to provide feedback
@@ -293,7 +293,7 @@ environments, but it is not without its limitations.
 Most importantly, local access to the filesystem is very restricted, as are
 other features (such as the webcam interface) when the site is opened as a file
 instead of being served remotely.
-Also, limitations in the Canvas specification prevented me from, for example,
+Also, limitations in the HTML5 Canvas specification prevented me from, for example,
 loading remote images via URL.
 On the other hand, once the site is being served (either on the internet, or using
 a local server such as WAMP or the Python script distributed with Alive),
@@ -302,4 +302,18 @@ for peripherals such as the webcam.
 
 # Conclusion
 
+The project requirements were successfully executed.
+Whether or not Alive is able to fill a role in early ICT education, it illustrates
+what such software might look like, and how it might be designed to interact with
+existing preschool learning.
+
+# References
+
+ * Anne Campbell and Grazia Scotellaro, "Learning with technology for pre-service
+   early childhood teachers", _Australasian Journal of Early Childhood_, vol. 24,
+   no. 2, pp. 11-18, Jun 2009. Online at <http://goo.gl/jW1iC>
+ * Connected-component labeling. Online at
+   <http://en.wikipedia.org/wiki/Connected-component_labeling>
+ * _Processee_ imaging library.
+   Online at <https://github.com/eightyeight/processee>
 
