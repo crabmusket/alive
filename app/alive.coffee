@@ -18,7 +18,6 @@ destination = "capture"
 processee.setup ->
 	@loadImage "test/painting#{i}.jpg" for i in [1..3]
 	@canvasSize = width: 640, height: 480
-	@webcam = on
 	@frameRate 30
 
 # After setup, make a new image to hold the captured frame.
@@ -69,6 +68,7 @@ processImage = ->
 # to sort out some sort of progress meter.
 processee.everyFrame ->
 	source = window.source
+	@webcam = source is "webcam"
 	switch stage
 		when stages.capture
 			@drawImage source
