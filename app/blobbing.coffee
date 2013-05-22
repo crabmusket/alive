@@ -49,7 +49,9 @@ window.blobs = (col, img) -> ->
 		label = p.red + (p.green << 8) + (p.blue << 16)
 		eq = equivalences.find label
 
+		# Get hue of this pixel from the hue image.
 		hue = (@getPixel x: p.x, y: p.y, of: col).red
+
 		# Push out the boundaries of this current label.
 		region = regions[eq]
 		if region?
