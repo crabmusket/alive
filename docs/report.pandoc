@@ -226,8 +226,13 @@ Unfortunately I could determine no solution for thin objects like these.
 
  ![Thin outlines are handled poorly.](cloud.jpg)
 
-At the other end of the spectrum, this sun has merged with two of the clearly-separate
-ray objects, 
+At the other end of the spectrum, the sun below has merged with two of the
+clearly-separate ray objects, producing an odd animation.
+These cases occur due to the simple classification of objects by axis-aligned
+bounding rectangles.
+Had these objects been fitted with circular bounds, or rectangular bounds aligned
+to the shapes of the rays, the overlaps probably would not have occurred and the
+objects would not have been merged.
 
  ![An inappropriately greedy merge.](sun.jpg)
 
@@ -289,7 +294,7 @@ environments, but it is not without its limitations.
 Most importantly, local access to the filesystem is very restricted, as are
 other features (such as the webcam interface) when the site is opened as a file
 instead of being served remotely.
-ALso, limitations in the Canvas specification prevented me from, for example,
+Also, limitations in the Canvas specification prevented me from, for example,
 loading remote images via URL.
 On the other hand, once the site is being served (either on the internet, or using
 a local server such as WAMP or the Python script distributed with Alive),
