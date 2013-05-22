@@ -45,7 +45,7 @@ processImage = ->
 	[blobbed, regions] = @do blobs col, separated
 	# Convert regions to objects on the canvas.
 	for l, r of @do mergeOverlapping @do mergeContained @do rejectRegionsBySize regions
-		processee.object new Sprite r
+		processee.object (s = new Sprite r), s.init source
 	# Freeze the webcam frame.
 	@copyImage
 		from: source
