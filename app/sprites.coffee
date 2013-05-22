@@ -3,7 +3,8 @@ window.Sprite = class Sprite
 	constructor: (@region) ->
 
 	draw: (self) ->
-		@at x: self.region.min.x, y: self.region.min.y, -> @drawImage self.sprite
+		@at x: self.region.min.x, y: self.region.min.y, ->
+			@drawImage self.sprite
 		if window.bounds
 			@fillColor = alpha: 0
 			@strokeColor = if within self.region, @mouse then green: 255 else red: 255
@@ -16,4 +17,8 @@ window.Sprite = class Sprite
 		@setEachPixelOf image: self.sprite, to: (p) ->
 			@getPixel x: p.x + r.min.x, y: p.y + r.min.y, of: img
 
+# Is a point p within a region r?
 within = (r, p) -> p.x > r.min.x and p.x < r.max.x and p.y > r.min.y and p.y < r.max.y
+
+# Get centre of a region.
+centre = (r) -> x: r.min.x + (r.max.x - r.min.x) / 2, y: r.min.y + (r.max.y - r.min.y) / 2

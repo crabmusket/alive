@@ -18,12 +18,12 @@
 			window.processingInstance.__mouseEvent (pageToCanvas e, 'move')
 	
 	($ 'form input[type=radio]').change ->
-		el = ($ 'form input[type=radio]:checked')
+		el = $ 'form input[type=radio]:checked'
 		window.source = el.val()
 
 	($ 'form #bounds').change ->
-		el = ($ 'form #bounds')
+		el = $ 'form #bounds'
 		window.bounds = el.is ':checked'
 
-	($ '.webcam').toggle(false)
+	($ '.webcam').toggle false
 
