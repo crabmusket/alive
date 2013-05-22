@@ -14,8 +14,7 @@ window.bounds = no
 # Set the canvas size, turn the webcam and so on.
 processee.setup ->
 	@canvasSize = width: 640, height: 480
-	#@webcam = on
-	#@webcamImageName = source
+	@webcam = on
 	@loadImage "test/painting#{i}.jpg" for i in [1..3]
 
 # After setup
