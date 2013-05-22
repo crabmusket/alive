@@ -1,42 +1,46 @@
 window.processee.init()
 
+# Different states of operation we may be in.
 stages =
-	capture: 0
-	process: 1
-	render: 2
+	capture: 0 # Render the captued image (e.g., webcam stream)
+	process: 1 # During processing. Not very useful.
+	render: 2  # Rendering the reconstructed scene with objects.
 stage = stages.capture
 
+# Global variables set by the UI.
 window.source = "test/painting1.jpg"
-window.destination = "capture"
 window.bounds = no
 
-# Setup stage
-# Set the canvas size, turn the webcam and so on.
+# Name of the image we use as a temporary buffer for a single frame.
+destination = "capture"
+
+# Set the canvas size, turn on the webcam and load up the test image files.
 processee.setup ->
+	@loadImage "test/painting#{i}.jpg" for i in [1..3]
 	@canvasSize = width: 640, height: 480
 	@webcam = on
-	@loadImage "test/painting#{i}.jpg" for i in [1..3]
+	@frameRate 30
 
-# After setup
+# After setup, make a new image to hold the captured frame.
 processee.once ->
 	@makeNewImage
 		name: destination
 		copy: source
 
-# Click responder
-# Toggle between webcam and animation. Launch the image processing stuff when
-# we need to.
+# Click responder toggles between stages. Each stage has some special actions.
 processee.onClick ->
 	switch stage
 		when stages.capture
+			# Process the captured image!
 			stage = stages.process
 			@do processImage
 		when stages.render
+			# Destroy all the objects ready to restart the capture process.
 			stage = stages.capture
 			processee.clearObjects()
 
-# Processing step
-# Performs all the algorithms that turn the captured image into 
+# Performs all the algorithms that turn the captured image into a series of
+# objects.
 processImage = ->
 	source = window.source
 	col = objToColor gray: 200
@@ -54,13 +58,13 @@ processImage = ->
 	# Convert regions to objects on the canvas.
 	for l, r of @do mergeOverlapping @do mergeContained @do rejectRegionsBySize regions
 		processee.object (s = new Sprite r), s.init source
-	# Freeze the webcam frame.
+	# Freeze (capture) the webcam frame.
 	@copyImage
 		from: source
 		to: destination
+	# Finished with the processing stage!
 	stage = stages.render
 
-# Frame update
 # Render either the stream from the webcam, or the animation if it's ready. Need
 # to sort out some sort of progress meter.
 processee.everyFrame ->
