@@ -28,7 +28,7 @@ window.blobs = (col, img) -> ->
 				labelNorth
 			when labelWest is labelNorth
 				labelWest
-			when labelWest > 0 and labelNorth > 0 and labelWest != labelNorth
+			when labelWest > 0 and labelNorth > 0 and labelWest isnt labelNorth
 				equivalences.merge labelWest, labelNorth
 				Math.min labelWest, labelNorth
 
