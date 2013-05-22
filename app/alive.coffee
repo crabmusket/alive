@@ -48,22 +48,21 @@ processee.onClick ->
 # Performs all the algorithms that turn the captured image into a series of
 # objects.
 processImage = ->
-	source = window.source
 	col = objToColor gray: 200
 	# Get a binary image of separated foreground elements. We subtract the colour
 	# separation from the foreground representation to create borders of background
 	# between objects of different colours.
 	separated = @do filters.sub [
 		# Foreground detection: simply chose objects that are not white!
-		fgsep = @do dilate 1, @do equalize @do foreground col, source
+		fgsep = @do dilate 1, @do equalize @do foreground col, destination
 		# Colour separation: convert image to hue representation then find borders.
-		colsep = @do edges @do median (col = @do toHue source)
+		colsep = @do edges @do median (col = @do toHue destination)
 	]
 	# Extract blobs from the separated image.
 	[blobbed, regions] = @do blobs col, separated
 	# Convert regions to objects on the canvas.
 	for l, r of @do mergeOverlapping @do mergeContained @do rejectRegionsBySize regions
-		processee.object (s = new Sprite r), s.init source
+		processee.object (s = new Sprite r), s.init destination
 	# Finished with the processing stage!
 	stage = stages.render
 	fade = 128
