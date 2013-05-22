@@ -200,7 +200,7 @@ These animations usually take the form of an exponentially decaying sine wave.
 For example, one animation implemented is:
 
 ```coffee
-@animation = (t) ->
+(t) ->
   angle: 0.1 * (Math.exp -2 * t) * Math.sin 15 * t
   stop: t > 5
 ```
