@@ -29,6 +29,15 @@ canvas:hover {
 	cursor: pointer;
 }
 
+form {
+	text-align: center;
+	margin: 20px;
+}
+
+input {
+	margin-left: 10px;
+}
+
 .internals {
 	position: fixed;
 	top: 100%;

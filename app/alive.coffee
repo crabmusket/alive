@@ -14,7 +14,8 @@ window.destination = "capture"
 processee.setup ->
 	@canvasSize = width: 640, height: 480
 	#@webcam = on
-	@loadImage source #@webcamImageName = source
+	#@webcamImageName = source
+	@loadImage "test/painting#{i}.jpg" for i in [1..3]
 
 # After setup
 processee.once ->
@@ -37,6 +38,7 @@ processee.onClick ->
 # Processing step
 # Performs all the algorithms that turn the captured image into 
 processImage = ->
+	source = window.source
 	col = objToColor gray: 200
 	# Get a binary image of separated foreground elements. We subtract the colour
 	# separation from the foreground representation to create borders of background
@@ -62,6 +64,7 @@ processImage = ->
 # Render either the stream from the webcam, or the animation if it's ready. Need
 # to sort out some sort of progress meter.
 processee.everyFrame ->
+	source = window.source
 	switch stage
 		when stages.capture
 			@drawImage source
@@ -70,23 +73,3 @@ processee.everyFrame ->
 
 window.processee.run()
 
-($ document).ready ->
-	win = $ window
-	canvas = $ '#processing'
-
-	pageToCanvas = (e, t) ->
-		o = canvas.offset()
-		return (
-			x: e.pageX - o.left
-			y: e.pageY - o.top
-			type: t
-		)
-
-	canvas.mousedown (e) ->
-		if window.processingInstance
-			window.processingInstance.__mouseEvent (pageToCanvas e, 'click')
-	canvas.mousemove (e) ->
-		if window.processingInstance
-			window.processingInstance.__mouseEvent (pageToCanvas e, 'move')
-
-	($ '.webcam').toggle(false)

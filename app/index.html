@@ -14,6 +14,7 @@
 	<script type="text/javascript" src="../processee/js/processee.js"></script>
 	<script type="text/javascript" src="../processee/js/filters.js"></script>
 
+	<script type="text/coffeescript" src="./main.coffee"></script>
 	<script type="text/coffeescript" src="./filters.coffee"></script>
 	<script type="text/coffeescript" src="./blobbing.coffee"></script>
 	<script type="text/coffeescript" src="./sprites.coffee"></script>
@@ -32,6 +33,12 @@
 			<a class="button small save-image" onclick="saveOutput();"></a>
 		</div>
 	</div>
+	<form class="right-bar">
+		<input type="radio" name="source" value="test/painting1.jpg" id="source1" checked /><label for="source1">Test 1</label>
+		<input type="radio" name="source" value="test/painting2.jpg" id="source2" /><label for="source2">Test 2</label>
+		<input type="radio" name="source" value="test/painting3.jpg" id="source3" /><label for="source3">Test 3</label>
+		<input type="radio" name="source" value="webcam" id="sourceW" /><label for="sourceW">Webcam</label>
+	</form>
 	<p id="instructions"></p>
 
 	<div class="internals">
