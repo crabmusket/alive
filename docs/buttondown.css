@@ -236,6 +236,7 @@ pre /* Code blocks */
     /* Set it off left and right, seems to look a bit nicer when we have a background */
     margin-left:  0.5em;
     margin-right: 0.5em;
+	 font-size: small;
     }
  
 @media screen
