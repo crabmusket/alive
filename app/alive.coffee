@@ -28,18 +28,23 @@ processee.once ->
 		copy: source
 
 fade = 0
+gray = 200
 
 # Click responder toggles between stages. Each stage has some special actions.
-processee.onClick ->
+processee.onClick (e) ->
 	switch stage
 		when stages.capture
-			# Process the captured image!
-			stage = stages.fadeOut
 			# Freeze (capture) the webcam frame.
 			@copyImage
 				from: source
 				to: destination
+			# Get the gray level at the selected pixel.
+			p = @getPixel x: e.x, y: e.y, of: destination
+			gray = Math.min 200, (p.red + p.green + p.blue) / 3
+			console.log gray
+			# Start the fade!
 			fade = 0
+			stage = stages.fadeOut
 		when stages.render
 			# Destroy all the objects ready to restart the capture process.
 			stage = stages.capture
@@ -48,7 +53,7 @@ processee.onClick ->
 # Performs all the algorithms that turn the captured image into a series of
 # objects.
 processImage = ->
-	col = objToColor gray: 200
+	col = objToColor gray: gray
 	# Get a binary image of separated foreground elements. We subtract the colour
 	# separation from the foreground representation to create borders of background
 	# between objects of different colours.

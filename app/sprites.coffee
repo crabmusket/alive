@@ -12,8 +12,7 @@ window.Sprite = class Sprite
 		if within self.region, @mouse
 			if not self.mouseOver
 				# Rising edge! Do stuff when the mouse first enters the shape.
-				if self.timer is 0
-					self.animation = self.pickAnimation()
+				self.animation = self.pickAnimation()
 				self.timer = 1
 			self.mouseOver = yes
 		else
