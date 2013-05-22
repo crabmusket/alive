@@ -1,14 +1,39 @@
 # Represents an object on the canvas.
 window.Sprite = class Sprite
 	constructor: (@region) ->
+		@mouseOver = no
+		@timer = 0
+		@animation = (t) ->
+			angle: 0.1 * (Math.exp -2 * t) * Math.sin 15 * t
+			stop: t > 5
 
 	draw: (self) ->
-		@at x: self.region.min.x, y: self.region.min.y, ->
-			@drawImage self.sprite
-		if window.bounds
-			@fillColor = alpha: 0
-			@strokeColor = if within self.region, @mouse then green: 255 else red: 255
-			@drawRect self.region
+		if within self.region, @mouse
+			if not self.mouseOver #
+				self.timer = 1
+				if self.timer is 0
+					1 # Swap animations.
+			self.mouseOver = yes
+		else
+			self.mouseOver = no
+
+		time = self.timer / 30
+		anim = self.animation time
+
+		@at (centre self.region), ->
+			@rotatedBy anim.angle, ->
+				@drawImage self.sprite, center: yes
+				if window.bounds
+					@fillColor = alpha: 0
+					@strokeColor = if within self.region, @mouse then green: 255 else red: 255
+					r = self.region
+					@drawRect
+						width: r.max.x - r.min.x
+						height: r.max.y - r.min.y
+
+		if anim.stop then self.timer = 0
+		if self.timer > 0
+			self.timer++
 
 	init: (img) -> (self) ->
 		r = self.region
