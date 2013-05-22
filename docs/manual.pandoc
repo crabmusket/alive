@@ -1,0 +1,16 @@
+% COMP3419 Multimedia Assignment Manual: Alive
+% Daniel Buckmaster
+% 
+
+# Overview
+
+Alive is an image toy that scans an image using the webcam and breaks it down into
+objects that animate when you touch them with the mouse.
+It runs in a web browser - compatibility is guaranteed with Google Chrome only.
+
+# Installation
+
+Alive can be run online at 
+
+# Use
+
