@@ -83,11 +83,18 @@ This means there are no extraneous UI elements.
 
  ![](system.jpg)
 
-The affordability of touching the main display was a question I considered during
+The affordance of touching the main display was a question I considered during
 development; in the end, I settled for changing the mouse cursor when it was over
 the canvas.
-Unfortunately, this does not improve affordability for touch interfaces, since
+Unfortunately, this does not improve affordance for touch interfaces, since
 there is no mouse to observe changing.
+
+In the end, I chose to add a small menu below the main display.
+The menu allows the user to select two static images to try the program on, or
+the webcam, and toggle debug rendering.
+WHile these started as a convenience for me while during development, I decided
+to leave them in as they provide a useful way to evaluate the system even without
+a webcam connected, or a child's painting to hand.
 
 ## Algorithm design and implementation
 
@@ -95,28 +102,113 @@ there is no mouse to observe changing.
 
 The algorithm design process was a case of testing what would work with different
 inputs and achieve the best results.
-Some aspects of the program, such as blob detection, are well-documented image
+Some parts of the program, such as blob detection, are well-documented image
 analysis tools.
-Others, such as the method to determine what kind of animation might suit a given
-type of object (or cluster of objects) are my own invention.
+Others, such as the hue-boundary object separation step or merging routine, are
+my own invention.
 
- #. Separate 'objects' (in the foreground) from the background, which will be an off-white colour
- #. Separate foreground into unique objects with a bounding region and a pixel mask
- #. Cluster some objects and create Sprites
- #. Reconstruct the scene with Sprites and a background colour
- #. Render the scene with animations
+The goal of this program is to transform a flat colour input image into a two-layer
+output structure where each separate object detected in the input is free to move
+independently of the rest of the image.
+The meta-algorithm runs as follows:
 
-### Foreground and object detection
+ #. Separate the foreground of the input image from the background
+ #. Separate the foreground into unique objects, recovering a rectangular
+    bounding area around each
+ #. For each foreground object create a 'sprite' whose appearance is the same
+    as the input image
+ #. Animate sprites when they are touched by the mouse
 
-### Object classification
+### Foreground detection
+
+Initially, I wanted to perform automatic background detection.
+However, I eventually decided to add the 'choose background' step to the system
+flowchart to make foreground detection work better.
+The process I devised for detecting the foreground has two parts.
+
+The first is a simple colour match on the chosen background colour.
+Pixels that are distant in colour-space from the background colour are considered
+to be part of the foreground.
+This results in a binary image, with white for the foreground and black for the
+background, and is implemented in the `foreground` and `equalize` functions.
+
+ ![Before and after the foreground separation step](foreground.jpg)
+
+After obtaining a full-output-range greyscale image, it is dilated by one radial
+pixel to provide a buffer around small or thin objects.
+An example of the algorithm in action is above.
+
+This step is implemented in CoffeeScript using a functional pipeline style:
+
+```coffee
+fgsep = @do dilate 1, @do equalize @do foreground col, source
+```
+
+This now differentiates foreground regions from background, but I wanted to go
+further and distinguish using colour as well.
+Many objects in simple images physically touch each other, but must be considered
+separate, like a house sitting on grass.
+Edge detection on the colour image is not effective enough for my purpose, unfortunately.
+
+The solution I devised was to convert the colour input image to its HSV representation
+and from there to a greyscale image containing only the H (hue) component.
+This provided good distinction between regions of different colours that I could
+perform edge detection on.
+An example of the result is shown below:
+
+ ![Before and after the hue-boundary step](hueboundary.jpg)
+
+First the `toHue` funtion is used to transform the source image to its H representation
+(the resulting image is saved as `col` for later use in object merging).
+Then the result is passed through a `median` filter, as the hue process generates
+noisy regions that are very effectively smoothed with this operator.
+Finally, the Sobel `edge` operator detects the colour boundaries.
+The entire step looks like this:
+
+```coffee
+colsep = @do edges @do median (col = @do toHue source)
+```
+
+When combined, these two steps give far greater object discrimination than either
+of them alone. The small flowers in the first example image are a fantastic
+case study:
+
+ ![Left: original image. Centre: blobs with foreground detection only. Right: blobs with hue boundary.](huecomp.jpg)
+
+### Object extraction and merging
+
+Finally, the process of extracting 'blobs' from the image can begin.
+Each 'blob' may represent an entire object, or just part of one (and may be
+merged into a whole object at a later stage).
+The two-pass blob extraction algorithm is a standard tool used to extract regions
+of an image, so it is used here with little modification in the `blobs` function.
+I should note that the algorithm works inside the image itself, using the RGB
+channels to label regions.
+
+An additional step in the algorithm uses the `col` image saved from the hue-boundary
+pass above to calculate the medina hue of each blob.
+This is used to help decide which objects should be merged into each other.
 
 ### Animation
 
-In order to keep the project manageable, the animations of each object after
-they had been detected were simple and frankly uninteresting.
-The first place to improve the system would be in these animations.
-Each animation is based on an 'inpulse' signal that is set whenever an object is
-touched by the mouse.
+To keep the project manageable (and because they're a reasonably uninteresting
+part of the whole system), only fairly simple animations involving rotation and
+scaling were implemented.
+When a sprite is touched by the mouse, it starts an internal timer and calculates
+the value of an animation function to determine its scale and rotation each frame.
+These animations usually take the form of an exponentially decaying sine wave.
+For example, one animation implemented is:
+
+```coffee
+@animation = (t) ->
+  angle: 0.1 * (Math.exp -2 * t) * Math.sin 15 * t
+  stop: t > 5
+```
+
+This function of time (`t`) returns an angle and a `stop` flag after 5 seconds.
+The angle is a small decaying sine wave of the imput time.
+Objects continue animating after the mouse has left them - until the `stop`
+flag is returned by the animation function.
 
 # System Evaluation
 
@@ -124,7 +216,7 @@ touched by the mouse.
 
 ## Performance
 
-## Framework
+## Framework and environment
 
 I was personally disappointed with the workflow offered by Python's OpenCV
 bindings, Processing, or Java.
@@ -147,6 +239,24 @@ Of course, there were several disadvantages:
 Fortunately, I think that neither of these disadvantages exceeded my abilities.
 The Processee environment has become quite robust in the process, and I am very
 happy with the application I built on top of it.
+
+The decision to use CoffeeScript was also a double-edged sword.
+While I was especially happy with the functional style the language allowed me
+to adopt (for example, the chained `@do` calls in the image processing steps),
+the way CoffeeScript was included in the application (compiled client-side from
+script tags) made it nearly impossible to debug runtime errors.
+
+The web browser as a JavaScript interpreter is one of my favourite deployment
+environments, but it is not without its limitations.
+Most importantly, local access to the filesystem is very restricted, as are
+other features (such as the webcam interface) when the site is opened as a file
+instead of being served remotely.
+ALso, limitations in the Canvas specification prevented me from, for example,
+loading remote images via URL.
+On the other hand, once the site is being served (either on the internet, or using
+a local server such as WAMP or the Python script distributed with Alive),
+the browser provides a convenient and ubiquitous platform with improving support
+for peripherals such as the webcam.
 
 # Conclusion
 
